@@ -1,57 +1,50 @@
-// screens/ProductDetailScreen.js
 import React, { useState, useEffect } from 'react';
-import { View, Text, Button, StyleSheet } from 'react-native';
-import axios from 'axios';
+import { View, Text, Button } from 'react-native';
 
 const ProductDetailScreen = ({ route, navigation }) => {
   const { productId } = route.params;
   const [product, setProduct] = useState(null);
 
   useEffect(() => {
-    axios.get(`https://saman-backend.onrender.com/api/v1/users/products/${productId}`)
-      .then(response => setProduct(response.data.product))
-      .catch(error => console.error(error));
+    // Fetch product details based on productId
+    fetch(`https://saman-backend.onrender.com/api/v1/users/products/${productId}`)
+      .then(response => response.json())
+      .then(data => setProduct(data))
+      .catch(error => console.error('Error fetching product details:', error));
   }, [productId]);
 
-  const addToCart = () => {
-    axios.post('https://saman-backend.onrender.com/api/v1/users/cart', { productId })
-      .then(() => {
-        alert('Product added to cart');
+  const handleAddToCart = () => {
+    // Add product to cart
+    fetch('https://saman-backend.onrender.com/api/v1/users/cart', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer <your_jwt_token>', // Replace with actual JWT token
+      },
+      body: JSON.stringify({ productId, quantity: 1 }),
+    })
+      .then(response => response.json())
+      .then(data => {
+        console.log('Added to cart:', data);
+        navigation.navigate('Cart');
       })
-      .catch(error => console.error(error));
+      .catch(error => console.error('Error adding to cart:', error));
   };
 
-  if (!product) return null;
-
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>{product.name}</Text>
-      <Text style={styles.price}>${product.price}</Text>
-      <Text style={styles.description}>{product.description}</Text>
-      <Button title="Add to Cart" onPress={addToCart} />
+    <View>
+      {product ? (
+        <>
+          <Text>{product.name}</Text>
+          <Text>{product.description}</Text>
+          <Text>${product.price}</Text>
+          <Button title="Add to Cart" onPress={handleAddToCart} />
+        </>
+      ) : (
+        <Text>Loading...</Text>
+      )}
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 10,
-    backgroundColor: '#fff',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-  },
-  price: {
-    fontSize: 20,
-    color: '#888',
-    marginVertical: 10,
-  },
-  description: {
-    fontSize: 16,
-    marginBottom: 20,
-  },
-});
 
 export default ProductDetailScreen;

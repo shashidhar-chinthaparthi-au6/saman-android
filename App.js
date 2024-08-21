@@ -1,7 +1,11 @@
-// App.js
 import React from 'react';
+import { CartProvider } from './screens/CartContext'; // Update with correct path
 import AppNavigator from './navigation/AppNavigator';
 
 export default function App() {
-  return <AppNavigator />;
+  return (
+    <CartProvider>
+      <AppNavigator />
+    </CartProvider>
+  );
 }
