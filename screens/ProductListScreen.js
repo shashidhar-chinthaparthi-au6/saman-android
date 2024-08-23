@@ -97,8 +97,10 @@ export default function ProductListScreen({ route }) {
   const renderItem = ({ item }) => (
     <View style={styles.productCard}>
       <Image source={{ uri: item.image }} style={styles.productImage} />
-      <Text style={styles.productName}>{item.name}</Text>
-      <Text style={styles.productPrice}>{formatPrice(item.price)}</Text>
+      <View style={styles.productDetails}>
+        <Text style={styles.productName}>{item.name}</Text>
+        <Text style={styles.productPrice}>{formatPrice(item.price)}</Text>
+      </View>
       <View style={styles.quantityContainer}>
         <TouchableOpacity 
           style={styles.quantityButton}
@@ -155,7 +157,11 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 120,
     borderRadius: 10,
-    marginBottom: 10,   
+    marginBottom: 10,
+  },
+  productDetails: {
+    alignItems: 'center',
+    marginBottom: 10,
   },
   productName: {
     fontSize: 16,
@@ -167,7 +173,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#6200ee',
     fontWeight: 'bold',
-    marginBottom: 10,
   },
   quantityContainer: {
     flexDirection: 'row',
