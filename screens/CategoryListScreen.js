@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, Image } from 'react-native';
 
-const NUM_COLUMNS = 2;  // Define a constant for number of columns
+const NUM_COLUMNS = 2;  // Define a constant for the number of columns
 
 export default function CategoryListScreen({ navigation }) {
   const [categories, setCategories] = useState([]);
 
   useEffect(() => {
     // Fetch categories from API
-    fetch('https://saman-backend.onrender.com/api/categories')
+    fetch('https://saman-backend.onrender.com/api/v1/categories')
       .then(response => response.json())  // Parse the JSON from the response
       .then(data => {
         setCategories(data.data);  // Set the categories state
@@ -25,7 +25,15 @@ export default function CategoryListScreen({ navigation }) {
         renderItem={({ item }) => (
           <TouchableOpacity 
             style={styles.card} 
-            onPress={() => navigation.navigate('SubCategoryList', { list:item.subCategories })}>
+            onPress={() => {
+              // Fetch subcategories based on category ID
+              fetch(`https://saman-backend.onrender.com/api/v1/subcategories/${item._id}`)
+                .then(response => response.json())
+                .then(data => {
+                  navigation.navigate('SubCategoryList', { list: data.data });
+                })
+                .catch(error => console.error(error));
+            }}>
             <Image source={{ uri: 'https://picsum.photos/200/200?random=' + item._id }} style={styles.cardImage} />
             <Text style={styles.cardText}>{item.name}</Text>
           </TouchableOpacity>

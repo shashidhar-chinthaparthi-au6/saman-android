@@ -11,9 +11,9 @@ export default function HomeScreen({ navigation }) {
       <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Signup')}>
         <Text style={styles.buttonText}>Signup</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.browseButton} onPress={() => navigation.navigate('CategoryList')}>
+      {/* <TouchableOpacity style={styles.browseButton} onPress={() => navigation.navigate('CategoryList')}>
         <Text style={styles.browseButtonText}>Browse Categories</Text>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
     </View>
   );
 }
