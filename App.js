@@ -1,11 +1,13 @@
+// App.js
 import React from 'react';
-import { CartProvider } from './screens/CartContext'; // Update with correct path
+import { Provider } from 'react-redux';
+import store from './store';
 import AppNavigator from './navigation/AppNavigator';
 
 export default function App() {
   return (
-    <CartProvider>
+    <Provider store={store}>
       <AppNavigator />
-    </CartProvider>
+    </Provider>
   );
 }

@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import { NavigationContainer } from '@react-navigation/native';
 import { Text, TouchableOpacity, View } from 'react-native';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons'; // Import the MaterialIcons component
 import HomeScreen from '../screens/HomeScreen';
 import LoginScreen from '../screens/LoginScreen';
 import SignupScreen from '../screens/SignupScreen';
@@ -17,6 +18,12 @@ const Stack = createStackNavigator();
 
 export default function AppNavigator() {
   const [cartCount, setCartCount] = useState(0); // Default value is 0
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // Default to false, update on login/logout
+
+  const handleLogout = () => {
+    // Handle your logout logic here (e.g., clear auth tokens, etc.)
+    setIsLoggedIn(false); // Set logged-in status to false
+  };
 
   return (
     <CartContext.Provider value={{ cartCount, setCartCount }}>
@@ -39,9 +46,22 @@ export default function AppNavigator() {
                     borderRadius: 5, // Optional: Rounded corners for better UI
                   }}
                 >
-                  <Text style={{ color: '#FFA500', fontSize: 18, fontWeight: 'bold' }}>
-                    Cart ({cartCount})
-                  </Text>
+                  <MaterialIcons name="shopping-cart" size={24} color="#FFA500" />
+                  {cartCount > 0 && (
+                    <View style={{ 
+                      position: 'absolute', 
+                      right: -8, 
+                      top: -8, 
+                      backgroundColor: 'red', 
+                      borderRadius: 10, 
+                      paddingHorizontal: 6, 
+                      paddingVertical: 2 
+                    }}>
+                      <Text style={{ color: '#fff', fontSize: 12, fontWeight: 'bold' }}>
+                        {cartCount}
+                      </Text>
+                    </View>
+                  )}
                 </TouchableOpacity>
               ),
             })}
@@ -49,50 +69,18 @@ export default function AppNavigator() {
           <Stack.Screen 
             name="Login" 
             component={LoginScreen} 
-            options={({ navigation }) => ({
+            options={{
               title: 'Login',
-              headerRight: () => (
-                <TouchableOpacity
-                  onPress={() => navigation.navigate('Cart')}
-                  style={{ 
-                    marginRight: 15, 
-                    justifyContent: 'center', 
-                    alignItems: 'center',
-                    backgroundColor: '#000', // Set background to black
-                    padding: 5, // Added padding for better touch area
-                    borderRadius: 5, // Optional: Rounded corners for better UI
-                  }}
-                >
-                  <Text style={{ color: '#FFA500', fontSize: 18, fontWeight: 'bold' }}>
-                    Cart ({cartCount})
-                  </Text>
-                </TouchableOpacity>
-              ),
-            })}
+              headerRight: () => null, // Remove cart button from Login screen
+            }}
           />
           <Stack.Screen 
             name="Signup" 
             component={SignupScreen} 
-            options={({ navigation }) => ({
+            options={{
               title: 'Signup',
-              headerRight: () => (
-                <TouchableOpacity
-                  onPress={() => navigation.navigate('Cart')}
-                  style={{ 
-                    marginRight: 15, 
-                    justifyContent: 'center', 
-                    alignItems: 'center',
-                    backgroundColor: '#000', // Set background to black
-                    padding: 5, // Added padding for better touch area
-                    borderRadius: 5, // Optional: Rounded corners for better UI
-                  }}
-                >
-                  <Text style={{ color: '#FFA500', fontSize: 18, fontWeight: 'bold' }}>
-                    Cart ({cartCount})
-                  </Text>
-                </TouchableOpacity>
-              ),
-            })}
+              headerRight: () => null, // Remove cart button from Signup screen
+            }}
           />
           <Stack.Screen 
             name="CategoryList" 
@@ -111,9 +99,22 @@ export default function AppNavigator() {
                     borderRadius: 5, // Optional: Rounded corners for better UI
                   }}
                 >
-                  <Text style={{ color: '#FFA500', fontSize: 18, fontWeight: 'bold' }}>
-                    Cart ({cartCount})
-                  </Text>
+                  <MaterialIcons name="shopping-cart" size={24} color="#FFA500" />
+                  {cartCount > 0 && (
+                    <View style={{ 
+                      position: 'absolute', 
+                      right: -8, 
+                      top: -8, 
+                      backgroundColor: 'red', 
+                      borderRadius: 10, 
+                      paddingHorizontal: 6, 
+                      paddingVertical: 2 
+                    }}>
+                      <Text style={{ color: '#fff', fontSize: 12, fontWeight: 'bold' }}>
+                        {cartCount}
+                      </Text>
+                    </View>
+                  )}
                 </TouchableOpacity>
               ),
             })}
@@ -135,9 +136,22 @@ export default function AppNavigator() {
                     borderRadius: 5, // Optional: Rounded corners for better UI
                   }}
                 >
-                  <Text style={{ color: '#FFA500', fontSize: 18, fontWeight: 'bold' }}>
-                    Cart ({cartCount})
-                  </Text>
+                  <MaterialIcons name="shopping-cart" size={24} color="#FFA500" />
+                  {cartCount > 0 && (
+                    <View style={{ 
+                      position: 'absolute', 
+                      right: -8, 
+                      top: -8, 
+                      backgroundColor: 'red', 
+                      borderRadius: 10, 
+                      paddingHorizontal: 6, 
+                      paddingVertical: 2 
+                    }}>
+                      <Text style={{ color: '#fff', fontSize: 12, fontWeight: 'bold' }}>
+                        {cartCount}
+                      </Text>
+                    </View>
+                  )}
                 </TouchableOpacity>
               ),
             })}
@@ -159,9 +173,22 @@ export default function AppNavigator() {
                     borderRadius: 5, // Optional: Rounded corners for better UI
                   }}
                 >
-                  <Text style={{ color: '#FFA500', fontSize: 18, fontWeight: 'bold' }}>
-                    Cart ({cartCount})
-                  </Text>
+                  <MaterialIcons name="shopping-cart" size={24} color="#FFA500" />
+                  {cartCount > 0 && (
+                    <View style={{ 
+                      position: 'absolute', 
+                      right: -8, 
+                      top: -8, 
+                      backgroundColor: 'red', 
+                      borderRadius: 10, 
+                      paddingHorizontal: 6, 
+                      paddingVertical: 2 
+                    }}>
+                      <Text style={{ color: '#fff', fontSize: 12, fontWeight: 'bold' }}>
+                        {cartCount}
+                      </Text>
+                    </View>
+                  )}
                 </TouchableOpacity>
               ),
             })}
@@ -183,9 +210,22 @@ export default function AppNavigator() {
                     borderRadius: 5, // Optional: Rounded corners for better UI
                   }}
                 >
-                  <Text style={{ color: '#FFA500', fontSize: 18, fontWeight: 'bold' }}>
-                    Cart ({cartCount})
-                  </Text>
+                  <MaterialIcons name="shopping-cart" size={24} color="#FFA500" />
+                  {cartCount > 0 && (
+                    <View style={{ 
+                      position: 'absolute', 
+                      right: -8, 
+                      top: -8, 
+                      backgroundColor: 'red', 
+                      borderRadius: 10, 
+                      paddingHorizontal: 6, 
+                      paddingVertical: 2 
+                    }}>
+                      <Text style={{ color: '#fff', fontSize: 12, fontWeight: 'bold' }}>
+                        {cartCount}
+                      </Text>
+                    </View>
+                  )}
                 </TouchableOpacity>
               ),
             })}
@@ -207,7 +247,7 @@ export default function AppNavigator() {
                     borderRadius: 5, // Optional: Rounded corners for better UI
                   }}
                 >
-                  <Text style={{ color: '#FFA500', fontSize: 18, fontWeight: 'bold' }}>
+                  <Text style={{ color: '#FFA500', fontWeight: 'bold' }}>
                     Checkout
                   </Text>
                 </TouchableOpacity>
@@ -217,26 +257,10 @@ export default function AppNavigator() {
           <Stack.Screen 
             name="Checkout" 
             component={CheckoutScreen} 
-            options={({ navigation }) => ({
+            options={{
               title: 'Checkout',
-              headerRight: () => (
-                <TouchableOpacity
-                  onPress={() => navigation.navigate('Cart')}
-                  style={{ 
-                    marginRight: 15, 
-                    justifyContent: 'center', 
-                    alignItems: 'center',
-                    backgroundColor: '#000', // Set background to black
-                    padding: 5, // Added padding for better touch area
-                    borderRadius: 5, // Optional: Rounded corners for better UI
-                  }}
-                >
-                  <Text style={{ color: '#FFA500', fontSize: 18, fontWeight: 'bold' }}>
-                    Cart ({cartCount})
-                  </Text>
-                </TouchableOpacity>
-              ),
-            })}
+              headerRight: () => null, // No additional button on Checkout screen
+            }}
           />
         </Stack.Navigator>
       </NavigationContainer>

@@ -13,9 +13,12 @@ export default function ProductListScreen({ route }) {
   const navigation = useNavigation();
 
   useEffect(() => {
-    fetch(`https://saman-backend.onrender.com/api/products/subcategory/${subCategoryId}`)
+    fetch(`https://saman-backend.onrender.com/api/v1/subcategories/${subCategoryId}/products`)
       .then(response => response.json())
-      .then(data => setProducts(data.data))
+      .then(data =>{
+        console.log('==============data',data)
+        setProducts(data.data)
+      })
       .catch(error => console.error("Error fetching products:", error));
   }, [subCategoryId]);
 
@@ -34,13 +37,12 @@ export default function ProductListScreen({ route }) {
 
   const handleAddToCart = async (product) => {
     const token = await AsyncStorage.getItem('userToken');
-    console.log("------tes",{ productId: product._id, quantity: quantities[product._id] || 1 })
     
     fetch('https://saman-backend.onrender.com/api/v1/users/cart', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`, // Replace with actual token
+        'Authorization': `Bearer ${token}`, // Corrected token format
       },
       body: JSON.stringify({ productId: product._id, quantity: quantities[product._id] || 1 }),
     })
@@ -62,11 +64,9 @@ export default function ProductListScreen({ route }) {
   };
 
   const handleRemoveFromCart = (product) => {
-    fetch(`https://saman-backend.onrender.com/api/cart/${product._id}`, {
+    fetch(`https://saman-backend.onrender.com/api/v1/users/cart/${product._id}`, {
       method: 'DELETE',
-    //   headers: {
-    //     'Authorization': `Bearer ${YOUR_AUTH_TOKEN}`, // Replace with actual token
-    //   },
+      // Add headers if required
     })
       .then(response => response.json())
       .then(data => {
@@ -97,10 +97,9 @@ export default function ProductListScreen({ route }) {
   const renderItem = ({ item }) => (
     <View style={styles.productCard}>
       <Image source={{ uri: item.image }} style={styles.productImage} />
-      <View style={styles.productDetails}>
-        <Text style={styles.productName}>{item.name}</Text>
-        <Text style={styles.productPrice}>{formatPrice(item.price)}</Text>
-      </View>
+      <Text style={styles.productName}>{item.name}</Text>
+      <Text style={styles.productPrice}>{formatPrice(item.price)}</Text>
+      <Text style={styles.stock}>stock available :{item.stock}</Text>
       <View style={styles.quantityContainer}>
         <TouchableOpacity 
           style={styles.quantityButton}
@@ -174,33 +173,37 @@ const styles = StyleSheet.create({
     color: '#6200ee',
     fontWeight: 'bold',
   },
+  stock: {
+    fontSize: 14,
+    color: 'grey',
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
   quantityContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 8,
   },
   quantityButton: {
-    backgroundColor: '#007BFF',
-    borderRadius: 4,
-    padding: 8,
-    margin: 4,
+    backgroundColor: '#6200ee',
+    padding: 10,
+    borderRadius: 5,
   },
   quantityButtonText: {
     color: '#fff',
     fontSize: 18,
   },
   quantity: {
-    fontSize: 18,
-    marginHorizontal: 16,
+    fontSize: 16,
+    marginHorizontal: 10,
   },
   addButton: {
-    backgroundColor: '#28a745',
-    borderRadius: 4,
-    padding: 8,
-    margin: 4,
+    backgroundColor: '#03dac6',
+    padding: 10,
+    borderRadius: 5,
+    marginLeft: 10,
   },
   addButtonText: {
     color: '#fff',
-    fontSize: 18,
+    fontSize: 16,
   },
 });
