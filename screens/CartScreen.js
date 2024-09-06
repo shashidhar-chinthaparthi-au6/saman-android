@@ -1,101 +1,113 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert } from 'react-native';
-import { CartContext } from '../contexts/CartContext'; // Ensure this path is correct
+import React, { useState, useEffect } from 'react';
+import { View, Text, Button, FlatList, Modal, Alert, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useSelector } from 'react-redux';
 
-export default function CartScreen({ navigation }) {
-  const [cartSummary, setCartSummary] = useState([]);
+const CartScreen = ({ navigation }) => {
+  const [cartItems, setCartItems] = useState([]);
   const [totalAmount, setTotalAmount] = useState(0);
-  const { setCartCount } = useContext(CartContext);
+  const [selectedAddress, setSelectedAddress] = useState(null);
+  const [addressModalVisible, setAddressModalVisible] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState('credit_card');
+  const [addresses, setAddresses] = useState([]);
+  const [newAddress, setNewAddress] = useState('');
+  const [contactNumber, setContactNumber] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [addressPickerValue, setAddressPickerValue] = useState('none');
+
+  const user = useSelector(state => state.auth.user);
 
   useEffect(() => {
-    const fetchCartSummary = async () => {
+    const fetchCartAndAddresses = async () => {
       try {
         const token = await AsyncStorage.getItem('userToken');
-        const response = await fetch('https://saman-backend.onrender.com/api/v1/users/cart', {
-          method: 'GET',
+        const cartResponse = await fetch('https://saman-backend.onrender.com/api/v1/order/cart', {
           headers: {
-            'Authorization': `Bearer ${token}`, // Replace with actual token
+            'Authorization': `Bearer ${token}`,
           },
         });
-        const data = await response.json();
+        const cartData = await cartResponse.json();
+        setCartItems(cartData);
+        const total = cartData.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+        setTotalAmount(total);
 
-        if (data.success) {
-          setCartSummary(data.cartSummary);
-
-          // Calculate the total items in the cart
-          const totalItems = data.cartSummary.reduce((sum, item) => sum + item.quantity, 0);
-          setCartCount(totalItems);
-
-          // Calculate the total amount
-          const total = data.cartSummary.reduce((sum, item) => sum + item.totalPrice, 0);
-          setTotalAmount(total);
-        }
+        // Fetch addresses
+        const addressResponse = await fetch('https://saman-backend.onrender.com/api/v1/order/addresses', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+        const addressData = await addressResponse.json();
+        setAddresses(addressData);
       } catch (error) {
-        console.error("Error fetching cart summary:", error);
+        console.error(error);
+        Alert.alert('Error', 'Failed to fetch data.');
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchCartSummary();
-  }, [setCartCount]);
-
-  const handleRemoveItem = async (cartItemId) => {
-    try {
-      const token = await AsyncStorage.getItem('userToken');
-      const response = await fetch(`https://saman-backend.onrender.com/api/v1/users/cart/${cartItemId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        // Update the cart summary after removing the item
-        setCartSummary((prevSummary) =>
-          prevSummary.filter((item) => item._id !== cartItemId)
-        );
-
-        // Update the cart count
-        const totalItems = prevSummary.reduce((sum, item) => sum + item.quantity, 0);
-        setCartCount(totalItems);
-
-        // Recalculate the total amount
-        const total = prevSummary.reduce((sum, item) => sum + item.totalPrice, 0);
-        setTotalAmount(total);
-      }
-    } catch (error) {
-      console.error("Error removing item from cart:", error);
-    }
-  };
+    fetchCartAndAddresses();
+  }, []);
 
   const handleConfirmOrder = async () => {
+    if (!selectedAddress) {
+      Alert.alert('Error', 'Please select or add a delivery address.');
+      return;
+    }
+  
     try {
       const token = await AsyncStorage.getItem('userToken');
-      console.log("======user",token)
-      const response = await fetch('https://saman-backend.onrender.com/api/v1/payment/create-order', {
+      // const userId = await AsyncStorage.getItem('userId'); // Fetch the userId from AsyncStorage
+      if (!user._id) {
+        Alert.alert('Error', 'User ID not found.');
+        return;
+      }
+
+      // Format the cart data
+      const formattedCart = cartItems.map(item => ({
+        _id: item._id,
+        product: {
+          _id: item.product._id,
+          name: item.product.name,
+          description: item.product.description,
+          price: item.product.price,
+          category: item.product.category,
+          subcategory: item.product.subcategory,
+          images: item.product.images,
+        },
+        quantity: item.quantity,
+        user: item.product.user, // Assuming this is correct; adjust if needed
+      }));
+
+      console.log("=================-d",JSON.stringify({
+        userId: user._id,
+        cart: formattedCart,
+        deliveryAddress: selectedAddress.address, // Ensure this matches the API expectation
+        paymentMethod,
+        totalAmount,
+      }))
+      const response = await fetch('https://saman-backend.onrender.com/api/v1/order/confirm', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ amount: totalAmount }),
+        body: JSON.stringify({
+          userId: user._id,
+          cart: cartItems,
+          deliveryAddress: selectedAddress.address, // Ensure this matches the API expectation
+          paymentMethod,
+          totalAmount,
+        })
       });
-
+  
       const data = await response.json();
 
-      if (data.success) {
-        Alert.alert(
-          'Order Confirmed',
-          `Order ID: ${data.order._id}\nAmount: ${new Intl.NumberFormat('en-IN', {
-            style: 'currency',
-            currency: 'INR',
-          }).format(totalAmount)}`,
-          [
-            { text: 'OK', onPress: () => navigation.navigate('CategoryList') },
-          ]
-        );
+      console.log("=============================adasdsadasdsdaassda",data)
+      if (data) {
+        navigation.navigate('AllOrders', { orderId: data._id });
       } else {
         Alert.alert('Error', 'Failed to confirm the order. Please try again.');
       }
@@ -104,129 +116,208 @@ export default function CartScreen({ navigation }) {
       Alert.alert('Error', 'Failed to confirm the order. Please try again.');
     }
   };
+  
 
-  const renderItem = ({ item }) => (
-    <View style={styles.cartItem}>
-      <Text style={styles.cartItemName}>{item.product.name}</Text>
-      <Text style={styles.cartItemQuantity}>Quantity: {item.quantity}</Text>
-      <Text style={styles.cartItemPrice}>
-        {new Intl.NumberFormat('en-IN', {
-          style: 'currency',
-          currency: 'INR',
-        }).format(item.totalPrice)}
-      </Text>
-      <TouchableOpacity
-        style={styles.removeButton}
-        onPress={() => handleRemoveItem(item.product._id)}
-      >
-        <Text style={styles.removeButtonText}>Remove</Text>
-      </TouchableOpacity>
-    </View>
-  );
+  const handleAddAddress = async () => {
+    if (!newAddress || !contactNumber) {
+      Alert.alert('Error', 'Both address and contact number are required.');
+      return;
+    }
+
+    try {
+      const token = await AsyncStorage.getItem('userToken');
+      const response = await fetch('https://saman-backend.onrender.com/api/v1/order/addresses', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ address: newAddress, contact: contactNumber }),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        setAddresses([...addresses, data.address]);
+        setSelectedAddress(data.address);
+        setAddressModalVisible(false);
+        setNewAddress('');
+        setContactNumber('');
+      } else {
+        Alert.alert('Error', 'Failed to add address. Please try again.');
+      }
+    } catch (error) {
+      console.error("Error adding address:", error);
+      Alert.alert('Error', 'Failed to add address. Please try again.');
+    }
+  };
 
   return (
     <View style={styles.container}>
-      <FlatList
-        data={cartSummary}
-        keyExtractor={(item) => item.product._id}
-        renderItem={renderItem}
-        ListEmptyComponent={() => (
-          <Text style={styles.emptyCartText}>No items in the cart.</Text>
-        )}
-      />
-      <View style={styles.totalContainer}>
-        <Text style={styles.totalText}>
-          Total: {new Intl.NumberFormat('en-IN', {
-            style: 'currency',
-            currency: 'INR',
-          }).format(totalAmount)}
-        </Text>
-        <TouchableOpacity style={styles.confirmButton} onPress={handleConfirmOrder}>
-          <Text style={styles.confirmButtonText}>Confirm Order</Text>
-        </TouchableOpacity>
-      </View>
+      {loading ? (
+        <Text>Loading...</Text>
+      ) : (
+        <>
+          <FlatList
+            data={cartItems}
+            keyExtractor={item => item._id}
+            renderItem={({ item }) => (
+              <View style={styles.cartItem}>
+                <Text style={styles.productName}>{item.product.name}</Text>
+                <Text>Quantity: {item.quantity}</Text>
+                <Text>Price: {item.product.price}</Text>
+              </View>
+            )}
+          />
+          <Text style={styles.totalAmount}>Total Amount: {totalAmount}</Text>
+          <Button title="Select Address" onPress={() => setAddressModalVisible(true)} />
+          <Text style={styles.selectedAddressText}>Selected Address: {selectedAddress ? selectedAddress.address : 'None'}</Text>
+          <Picker
+            selectedValue={paymentMethod}
+            style={styles.picker}
+            onValueChange={(itemValue) => setPaymentMethod(itemValue)}
+          >
+            <Picker.Item label="Credit Card" value="credit_card" />
+            <Picker.Item label="Cash on Delivery" value="cash_on_delivery" />
+          </Picker>
+          <Button title="Confirm Order" onPress={handleConfirmOrder} />
+
+          {/* Address Modal */}
+          <Modal
+            visible={addressModalVisible}
+            onRequestClose={() => setAddressModalVisible(false)}
+            transparent={true}
+            animationType="slide"
+          >
+            <View style={styles.modalContainer}>
+              <View style={styles.modalContent}>
+                <Text style={styles.modalTitle}>Select Address</Text>
+                <Picker
+                  selectedValue={addressPickerValue}
+                  style={styles.picker}
+                  onValueChange={(itemValue) => {
+                    setAddressPickerValue(itemValue);
+                    if (itemValue === 'add_new') {
+                      setSelectedAddress(null);
+                    } else {
+                      setSelectedAddress(addresses.find(address => address._id === itemValue));
+                    }
+                  }}
+                >
+                  {addresses.map((address) => (
+                    <Picker.Item key={address._id} label={address.address} value={address._id} />
+                  ))}
+                  <Picker.Item label="Add New Address" value="add_new" />
+                </Picker>
+                {addressPickerValue === 'add_new' && (
+                  <View style={styles.addressForm}>
+                    <Text style={styles.inputLabel}>Address</Text>
+                    <TextInput
+                      style={styles.textInput}
+                      placeholder="Enter address"
+                      value={newAddress}
+                      onChangeText={setNewAddress}
+                    />
+                    <Text style={styles.inputLabel}>Contact Number</Text>
+                    <TextInput
+                      style={styles.textInput}
+                      placeholder="Enter contact number"
+                      value={contactNumber}
+                      onChangeText={setContactNumber}
+                      keyboardType="phone-pad"
+                    />
+                    <Button title="Add Address" onPress={handleAddAddress} />
+                  </View>
+                )}
+                <TouchableOpacity style={styles.closeButton} onPress={() => setAddressModalVisible(false)}>
+                  <Text style={styles.closeButtonText}>Close</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Modal>
+        </>
+      )}
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 10,
-    backgroundColor: '#f5f5f5',
+    padding: 20,
   },
   cartItem: {
-    backgroundColor: '#fff',
+    marginBottom: 15,
     padding: 15,
+    borderColor: '#ddd',
+    borderWidth: 1,
     borderRadius: 10,
-    marginBottom: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 5,
-    elevation: 5,
+    backgroundColor: '#f9f9f9',
   },
-  cartItemName: {
+  productName: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-  },
-  cartItemQuantity: {
-    fontSize: 14,
-    color: '#666',
-  },
-  cartItemPrice: {
-    fontSize: 16,
-    color: '#6200ee',
     fontWeight: 'bold',
   },
-  removeButton: {
-    marginTop: 10,
-    backgroundColor: '#ff6666',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 5,
-  },
-  removeButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  totalContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 20,
-    padding: 15,
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 5,
-    elevation: 5,
-  },
-  totalText: {
+  totalAmount: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#333',
+    marginVertical: 10,
   },
-  confirmButton: {
-    backgroundColor: '#6200ee',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 5,
+  selectedAddressText: {
+    fontSize: 16,
+    marginVertical: 10,
   },
-  confirmButtonText: {
-    color: '#fff',
+  picker: {
+    height: 50,
+    width: '100%',
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  modalContent: {
+    margin: 20,
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 10,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+  },
+  modalTitle: {
+    fontSize: 18,
     fontWeight: 'bold',
-    fontSize: 16,
-    textAlign: 'center',
+    marginBottom: 10,
   },
-  emptyCartText: {
-    fontSize: 16,
-    color: '#666',
-    textAlign: 'center',
+  addressForm: {
     marginTop: 20,
   },
+  inputLabel: {
+    fontSize: 16,
+    marginBottom: 5,
+    fontWeight: '600',
+  },
+  textInput: {
+    height: 40,
+    borderColor: '#ddd',
+    borderWidth: 1,
+    marginBottom: 10,
+    paddingHorizontal: 10,
+    borderRadius: 5,
+  },
+  closeButton: {
+    marginTop: 20,
+    padding: 10,
+    backgroundColor: '#007BFF',
+    borderRadius: 5,
+  },
+  closeButtonText: {
+    color: 'white',
+    textAlign: 'center',
+    fontSize: 16,
+  },
 });
+
+export default CartScreen;

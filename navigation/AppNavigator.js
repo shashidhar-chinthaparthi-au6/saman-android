@@ -13,6 +13,7 @@ import ProductDetailScreen from '../screens/ProductDetailScreen';
 import CartScreen from '../screens/CartScreen';
 import CheckoutScreen from '../screens/CheckoutScreen';
 import { CartContext } from '../contexts/CartContext'; // Ensure this path is correct
+import AllOrdersScreen from '../screens/AllOrdersScreen';
 
 const Stack = createStackNavigator();
 
@@ -25,6 +26,42 @@ export default function AppNavigator() {
     setIsLoggedIn(false); // Set logged-in status to false
   };
 
+  const renderCartIcon = (navigation) => {
+    if (isLoggedIn) {
+      return (
+        <TouchableOpacity
+          onPress={() => navigation.navigate('Cart')}
+          style={{ 
+            marginRight: 15, 
+            justifyContent: 'center', 
+            alignItems: 'center',
+            backgroundColor: '#000', // Set background to black
+            padding: 5, // Added padding for better touch area
+            borderRadius: 5, // Optional: Rounded corners for better UI
+          }}
+        >
+          <MaterialIcons name="shopping-cart" size={24} color="#FFA500" />
+          {cartCount > 0 && (
+            <View style={{ 
+              position: 'absolute', 
+              right: -8, 
+              top: -8, 
+              backgroundColor: 'red', 
+              borderRadius: 10, 
+              paddingHorizontal: 6, 
+              paddingVertical: 2 
+            }}>
+              <Text style={{ color: '#fff', fontSize: 12, fontWeight: 'bold' }}>
+                {cartCount}
+              </Text>
+            </View>
+          )}
+        </TouchableOpacity>
+      );
+    }
+    return null;
+  };
+
   return (
     <CartContext.Provider value={{ cartCount, setCartCount }}>
       <NavigationContainer>
@@ -34,36 +71,7 @@ export default function AppNavigator() {
             component={HomeScreen} 
             options={({ navigation }) => ({
               title: 'Home',
-              headerRight: () => (
-                <TouchableOpacity
-                  onPress={() => navigation.navigate('Cart')}
-                  style={{ 
-                    marginRight: 15, 
-                    justifyContent: 'center', 
-                    alignItems: 'center',
-                    backgroundColor: '#000', // Set background to black
-                    padding: 5, // Added padding for better touch area
-                    borderRadius: 5, // Optional: Rounded corners for better UI
-                  }}
-                >
-                  <MaterialIcons name="shopping-cart" size={24} color="#FFA500" />
-                  {cartCount > 0 && (
-                    <View style={{ 
-                      position: 'absolute', 
-                      right: -8, 
-                      top: -8, 
-                      backgroundColor: 'red', 
-                      borderRadius: 10, 
-                      paddingHorizontal: 6, 
-                      paddingVertical: 2 
-                    }}>
-                      <Text style={{ color: '#fff', fontSize: 12, fontWeight: 'bold' }}>
-                        {cartCount}
-                      </Text>
-                    </View>
-                  )}
-                </TouchableOpacity>
-              ),
+              headerRight: () => renderCartIcon(navigation),
             })}
           />
           <Stack.Screen 
@@ -87,36 +95,7 @@ export default function AppNavigator() {
             component={CategoryListScreen} 
             options={({ navigation }) => ({
               title: 'Categories',
-              headerRight: () => (
-                <TouchableOpacity
-                  onPress={() => navigation.navigate('Cart')}
-                  style={{ 
-                    marginRight: 15, 
-                    justifyContent: 'center', 
-                    alignItems: 'center',
-                    backgroundColor: '#000', // Set background to black
-                    padding: 5, // Added padding for better touch area
-                    borderRadius: 5, // Optional: Rounded corners for better UI
-                  }}
-                >
-                  <MaterialIcons name="shopping-cart" size={24} color="#FFA500" />
-                  {cartCount > 0 && (
-                    <View style={{ 
-                      position: 'absolute', 
-                      right: -8, 
-                      top: -8, 
-                      backgroundColor: 'red', 
-                      borderRadius: 10, 
-                      paddingHorizontal: 6, 
-                      paddingVertical: 2 
-                    }}>
-                      <Text style={{ color: '#fff', fontSize: 12, fontWeight: 'bold' }}>
-                        {cartCount}
-                      </Text>
-                    </View>
-                  )}
-                </TouchableOpacity>
-              ),
+              headerRight: () => renderCartIcon(navigation),
             })}
           />
           <Stack.Screen 
@@ -124,36 +103,7 @@ export default function AppNavigator() {
             component={SubCategoryListScreen} 
             options={({ navigation }) => ({
               title: 'Subcategories',
-              headerRight: () => (
-                <TouchableOpacity
-                  onPress={() => navigation.navigate('Cart')}
-                  style={{ 
-                    marginRight: 15, 
-                    justifyContent: 'center', 
-                    alignItems: 'center',
-                    backgroundColor: '#000', // Set background to black
-                    padding: 5, // Added padding for better touch area
-                    borderRadius: 5, // Optional: Rounded corners for better UI
-                  }}
-                >
-                  <MaterialIcons name="shopping-cart" size={24} color="#FFA500" />
-                  {cartCount > 0 && (
-                    <View style={{ 
-                      position: 'absolute', 
-                      right: -8, 
-                      top: -8, 
-                      backgroundColor: 'red', 
-                      borderRadius: 10, 
-                      paddingHorizontal: 6, 
-                      paddingVertical: 2 
-                    }}>
-                      <Text style={{ color: '#fff', fontSize: 12, fontWeight: 'bold' }}>
-                        {cartCount}
-                      </Text>
-                    </View>
-                  )}
-                </TouchableOpacity>
-              ),
+              headerRight: () => renderCartIcon(navigation),
             })}
           />
           <Stack.Screen 
@@ -161,36 +111,7 @@ export default function AppNavigator() {
             component={ProductListScreen} 
             options={({ navigation }) => ({
               title: 'Products',
-              headerRight: () => (
-                <TouchableOpacity
-                  onPress={() => navigation.navigate('Cart')}
-                  style={{ 
-                    marginRight: 15, 
-                    justifyContent: 'center', 
-                    alignItems: 'center',
-                    backgroundColor: '#000', // Set background to black
-                    padding: 5, // Added padding for better touch area
-                    borderRadius: 5, // Optional: Rounded corners for better UI
-                  }}
-                >
-                  <MaterialIcons name="shopping-cart" size={24} color="#FFA500" />
-                  {cartCount > 0 && (
-                    <View style={{ 
-                      position: 'absolute', 
-                      right: -8, 
-                      top: -8, 
-                      backgroundColor: 'red', 
-                      borderRadius: 10, 
-                      paddingHorizontal: 6, 
-                      paddingVertical: 2 
-                    }}>
-                      <Text style={{ color: '#fff', fontSize: 12, fontWeight: 'bold' }}>
-                        {cartCount}
-                      </Text>
-                    </View>
-                  )}
-                </TouchableOpacity>
-              ),
+              headerRight: () => renderCartIcon(navigation),
             })}
           />
           <Stack.Screen 
@@ -198,40 +119,11 @@ export default function AppNavigator() {
             component={ProductDetailScreen} 
             options={({ navigation }) => ({
               title: 'Product Details',
-              headerRight: () => (
-                <TouchableOpacity
-                  onPress={() => navigation.navigate('Cart')}
-                  style={{ 
-                    marginRight: 15, 
-                    justifyContent: 'center', 
-                    alignItems: 'center',
-                    backgroundColor: '#000', // Set background to black
-                    padding: 5, // Added padding for better touch area
-                    borderRadius: 5, // Optional: Rounded corners for better UI
-                  }}
-                >
-                  <MaterialIcons name="shopping-cart" size={24} color="#FFA500" />
-                  {cartCount > 0 && (
-                    <View style={{ 
-                      position: 'absolute', 
-                      right: -8, 
-                      top: -8, 
-                      backgroundColor: 'red', 
-                      borderRadius: 10, 
-                      paddingHorizontal: 6, 
-                      paddingVertical: 2 
-                    }}>
-                      <Text style={{ color: '#fff', fontSize: 12, fontWeight: 'bold' }}>
-                        {cartCount}
-                      </Text>
-                    </View>
-                  )}
-                </TouchableOpacity>
-              ),
+              headerRight: () => renderCartIcon(navigation),
             })}
           />
           <Stack.Screen 
-            name="Cart" 
+            name="CartScreen" 
             component={CartScreen} 
             options={({ navigation }) => ({
               title: 'Cart Summary',
@@ -260,6 +152,14 @@ export default function AppNavigator() {
             options={{
               title: 'Checkout',
               headerRight: () => null, // No additional button on Checkout screen
+            }}
+          />
+          <Stack.Screen 
+            name="AllOrders" 
+            component={AllOrdersScreen} 
+            options={{
+              title: 'All Orders',
+              headerRight: () => null, // Adjust as needed
             }}
           />
         </Stack.Navigator>

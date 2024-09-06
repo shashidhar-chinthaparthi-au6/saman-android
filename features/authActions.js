@@ -9,8 +9,12 @@ export const loginUser = (email, password) => async (dispatch) => {
   try {
     const response = await axios.post(`${API_URL}/login`, { email, password });
     console.log('Login response:', response.data);
-    const { token } = response.data;
-    dispatch(loginSuccess(token));
+    const { token, user } = response.data;
+    dispatch(loginSuccess({ token, user }));
+    // Optionally save token and user details in local storage or AsyncStorage
+    // Example for AsyncStorage:
+    // await AsyncStorage.setItem('userToken', token);
+    // await AsyncStorage.setItem('userId', user._id);
     // Optionally save token in local storage or AsyncStorage
     return { success: true }; // Return success info
   } catch (error) {
