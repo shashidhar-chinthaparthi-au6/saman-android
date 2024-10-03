@@ -21,6 +21,7 @@ const LoginScreen = ({ route, navigation }) => {
 
   useEffect(() => {
     if (token) {
+      // This is where you should update the `isLoggedIn` state in the parent component
       navigation.navigate('CategoryList');
     }
     if (error) {

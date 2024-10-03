@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, TouchableOpacity, Alert, Picker, StyleSheet } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useSelector } from 'react-redux';
 
 export default function AllOrdersScreen({ navigation }) {
   const [orders, setOrders] = useState([]);
   const [cancelReason, setCancelReason] = useState(''); // Store cancel reason
   const [selectedOrder, setSelectedOrder] = useState(null); // Store selected order for cancellation
+  const token = useSelector(state => state.auth.token);
 
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const token = await AsyncStorage.getItem('userToken');
         const response = await fetch('https://saman-backend.onrender.com/api/v1/order/orders', {
           method: 'GET',
           headers: {

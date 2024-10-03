@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer } from '@react-navigation/native';
 import { Text, TouchableOpacity, View } from 'react-native';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons'; // Import the MaterialIcons component
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import HomeScreen from '../screens/HomeScreen';
 import LoginScreen from '../screens/LoginScreen';
 import SignupScreen from '../screens/SignupScreen';
@@ -12,158 +13,107 @@ import ProductListScreen from '../screens/ProductListScreen';
 import ProductDetailScreen from '../screens/ProductDetailScreen';
 import CartScreen from '../screens/CartScreen';
 import CheckoutScreen from '../screens/CheckoutScreen';
-import { CartContext } from '../contexts/CartContext'; // Ensure this path is correct
 import AllOrdersScreen from '../screens/AllOrdersScreen';
+import AccountScreen from '../screens/AccountScreen';
+import SearchScreen from '../screens/SearchScreen';
+import HelpScreen from '../screens/HelpScreen';
+import { CartContext } from '../contexts/CartContext';
+import { useSelector } from 'react-redux';
+import AccountStackNavigator from './AccountStackNavigator';
+import CategoryStackNavigator from './CategoryStackNavigator';
 
 const Stack = createStackNavigator();
+const Tab = createBottomTabNavigator();
 
-export default function AppNavigator() {
-  const [cartCount, setCartCount] = useState(0); // Default value is 0
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // Default to false, update on login/logout
+function AuthStackNavigator() {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen name="Home" component={HomeScreen} />
+      <Stack.Screen name="Login" component={LoginScreen} />
+      <Stack.Screen name="Signup" component={SignupScreen} />
+    </Stack.Navigator>
+  );
+}
 
-  const handleLogout = () => {
-    // Handle your logout logic here (e.g., clear auth tokens, etc.)
-    setIsLoggedIn(false); // Set logged-in status to false
-  };
+function AppStackNavigator() {
+  const [cartCount, setCartCount] = useState(0);
 
-  const renderCartIcon = (navigation) => {
-    if (isLoggedIn) {
-      return (
-        <TouchableOpacity
-          onPress={() => navigation.navigate('Cart')}
-          style={{ 
-            marginRight: 15, 
-            justifyContent: 'center', 
-            alignItems: 'center',
-            backgroundColor: '#000', // Set background to black
-            padding: 5, // Added padding for better touch area
-            borderRadius: 5, // Optional: Rounded corners for better UI
-          }}
-        >
-          <MaterialIcons name="shopping-cart" size={24} color="#FFA500" />
-          {cartCount > 0 && (
-            <View style={{ 
-              position: 'absolute', 
-              right: -8, 
-              top: -8, 
-              backgroundColor: 'red', 
-              borderRadius: 10, 
-              paddingHorizontal: 6, 
-              paddingVertical: 2 
-            }}>
-              <Text style={{ color: '#fff', fontSize: 12, fontWeight: 'bold' }}>
-                {cartCount}
-              </Text>
-            </View>
-          )}
-        </TouchableOpacity>
-      );
-    }
-    return null;
-  };
+  // const renderCartIcon = (navigation) => (
+  //   <TouchableOpacity
+  //     onPress={() => navigation.navigate('CartScreen')}
+  //     style={{
+  //       marginRight: 15,
+  //       justifyContent: 'center',
+  //       alignItems: 'center',
+  //       backgroundColor: '#000',
+  //       padding: 5,
+  //       borderRadius: 5,
+  //     }}
+  //   >
+  //     <MaterialIcons name="shopping-cart" size={24} color="#FFA500" />
+  //     {cartCount > 0 && (
+  //       <View
+  //         style={{
+  //           position: 'absolute',
+  //           right: -8,
+  //           top: -8,
+  //           backgroundColor: 'red',
+  //           borderRadius: 10,
+  //           paddingHorizontal: 6,
+  //           paddingVertical: 2,
+  //         }}
+  //       >
+  //         <Text style={{ color: '#fff', fontSize: 12, fontWeight: 'bold' }}>
+  //           {cartCount}
+  //         </Text>
+  //       </View>
+  //     )}
+  //   </TouchableOpacity>
+  // );
 
   return (
-    <CartContext.Provider value={{ cartCount, setCartCount }}>
-      <NavigationContainer>
-        <Stack.Navigator initialRouteName="Home">
-          <Stack.Screen 
-            name="Home" 
-            component={HomeScreen} 
-            options={({ navigation }) => ({
-              title: 'Home',
-              headerRight: () => renderCartIcon(navigation),
-            })}
-          />
-          <Stack.Screen 
-            name="Login" 
-            component={LoginScreen} 
-            options={{
-              title: 'Login',
-              headerRight: () => null, // Remove cart button from Login screen
-            }}
-          />
-          <Stack.Screen 
-            name="Signup" 
-            component={SignupScreen} 
-            options={{
-              title: 'Signup',
-              headerRight: () => null, // Remove cart button from Signup screen
-            }}
-          />
-          <Stack.Screen 
-            name="CategoryList" 
-            component={CategoryListScreen} 
-            options={({ navigation }) => ({
-              title: 'Categories',
-              headerRight: () => renderCartIcon(navigation),
-            })}
-          />
-          <Stack.Screen 
-            name="SubCategoryList" 
-            component={SubCategoryListScreen} 
-            options={({ navigation }) => ({
-              title: 'Subcategories',
-              headerRight: () => renderCartIcon(navigation),
-            })}
-          />
-          <Stack.Screen 
-            name="ProductList" 
-            component={ProductListScreen} 
-            options={({ navigation }) => ({
-              title: 'Products',
-              headerRight: () => renderCartIcon(navigation),
-            })}
-          />
-          <Stack.Screen 
-            name="ProductDetail" 
-            component={ProductDetailScreen} 
-            options={({ navigation }) => ({
-              title: 'Product Details',
-              headerRight: () => renderCartIcon(navigation),
-            })}
-          />
-          <Stack.Screen 
-            name="CartScreen" 
-            component={CartScreen} 
-            options={({ navigation }) => ({
-              title: 'Cart Summary',
-              headerRight: () => (
-                <TouchableOpacity
-                  onPress={() => navigation.navigate('Checkout')}
-                  style={{ 
-                    marginRight: 15, 
-                    justifyContent: 'center', 
-                    alignItems: 'center',
-                    backgroundColor: '#000', // Set background to black
-                    padding: 5, // Added padding for better touch area
-                    borderRadius: 5, // Optional: Rounded corners for better UI
-                  }}
-                >
-                  <Text style={{ color: '#FFA500', fontWeight: 'bold' }}>
-                    Checkout
-                  </Text>
-                </TouchableOpacity>
-              ),
-            })}
-          />
-          <Stack.Screen 
-            name="Checkout" 
-            component={CheckoutScreen} 
-            options={{
-              title: 'Checkout',
-              headerRight: () => null, // No additional button on Checkout screen
-            }}
-          />
-          <Stack.Screen 
-            name="AllOrders" 
-            component={AllOrdersScreen} 
-            options={{
-              title: 'All Orders',
-              headerRight: () => null, // Adjust as needed
-            }}
-          />
-        </Stack.Navigator>
-      </NavigationContainer>
-    </CartContext.Provider>
+    // <CartContext.Provider value={{ cartCount, setCartCount }}>
+      <Stack.Navigator>
+        <Stack.Screen
+          name="ProductDetail"
+          component={ProductDetailScreen}
+          options={({ navigation }) => ({
+            headerRight: () => renderCartIcon(navigation),
+          })}
+        />
+        
+      </Stack.Navigator>
+    // </CartContext.Provider>
+  );
+}
+
+function TabNavigator() {
+  return (
+    <Tab.Navigator>
+      <Tab.Screen name="CategoryList" component={CategoryStackNavigator} options={{ headerShown: false }}/>
+      {/* <Tab.Screen name="Account" component={AccountStackNavigator} /> */}
+      <Tab.Screen name="AllOrders" component={AllOrdersScreen} options={{ title: "Orders" }}/>
+      <Tab.Screen name="Help" component={HelpScreen} />
+    </Tab.Navigator>
+  );
+}
+
+
+export default function App() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const token = useSelector((state) => state.auth.token);
+
+  useEffect(() => {
+    if (token) {
+      setIsLoggedIn(true);
+    } else {
+      setIsLoggedIn(false);
+    }
+  }, [token]);
+
+  return (
+    <NavigationContainer>
+      {isLoggedIn ? <TabNavigator /> : <AuthStackNavigator />}
+    </NavigationContainer>
   );
 }

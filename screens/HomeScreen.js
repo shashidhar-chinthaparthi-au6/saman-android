@@ -5,13 +5,23 @@ export default function HomeScreen({ navigation }) {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Welcome to Saman App!</Text>
-      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Login')}>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => navigation.navigate('Login')}
+      >
         <Text style={styles.buttonText}>Login</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Signup')}>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => navigation.navigate('Signup')}
+      >
         <Text style={styles.buttonText}>Signup</Text>
       </TouchableOpacity>
-      {/* <TouchableOpacity style={styles.browseButton} onPress={() => navigation.navigate('CategoryList')}>
+      {/* Uncomment the following if you want to enable the Browse Categories button */}
+      {/* <TouchableOpacity
+        style={styles.browseButton}
+        onPress={() => navigation.navigate('CategoryList')}
+      >
         <Text style={styles.browseButtonText}>Browse Categories</Text>
       </TouchableOpacity> */}
     </View>
